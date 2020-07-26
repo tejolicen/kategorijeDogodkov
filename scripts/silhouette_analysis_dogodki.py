@@ -16,7 +16,7 @@ from polyglot.text import Text, Word
 
 
 print(__doc__)
-
+# 
 # Generating the sample data from make_blobs
 # This particular setting has one distinct cluster and 3 clusters placed close
 # together.
