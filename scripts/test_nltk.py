@@ -9,6 +9,9 @@ from nltk.stem import WordNetLemmatizer
 import string
 import lemmagen.lemmatizer
 from lemmagen.lemmatizer import Lemmatizer
+import polyglot
+from polyglot.text import Text, WordTokenizer
+from polyglot.detect import Detector
 #nltk.download()
 
 set(stopwords.words('slovene'))
@@ -24,6 +27,54 @@ data_opis = df['opis'].astype('U')
 dataLength = len(data_opis)
 
 print_output = False
+
+indexesToRemove = []
+
+#preverimo delež jezikov v besedilih in primerno sfiltriramo
+def preveriJezike(arr):
+    sfiltriranArr = []
+    i = 0
+    for row in arr:
+        try:
+            detector = Detector(str(row), quiet=True)
+            jeSlovenscina = False
+            for language in detector.languages:
+                if language.code != 'un':
+                    if language.code == 'sl':
+                        jeSlovenscina = True
+                        #če je SLO več kot 90%, pustiš vse
+                        if language.confidence >= 90:
+                            sfiltriranArr.append(row)
+                        #če je SLO več kot 50% in manj kot 90% pa sfiltriraš vse tuje stavke    
+                        if language.confidence < 90 and language.confidence >= 50:
+                            sfiltriranArr.append(odstraniTujeStavke(row))
+                        #če je SLO manj kot 50%, dogodek vržeš vn
+                        if language.confidence < 50: 
+                            indexesToRemove.append(i)
+            if(not jeSlovenscina):
+                indexesToRemove.append(i)
+        except:
+            print('Preskočena vrstica: ' + row)
+        i = i + 1
+    return sfiltriranArr
+
+
+def odstraniTujeStavke(row):
+    returnArray = []
+    text = Text(row)
+    
+    for sentance in text.words: # TODO? sentances
+        try:
+            odstrani = False
+            detector = Detector(str(sentance), quiet=True)
+            for language in detector.languages:
+                if language.code != 'sl' and language.confidence > 90:
+                    odstrani = True
+            if not odstrani:
+                returnArray.append(sentance)
+        except:
+            print('Preskočen stavek: ' + sentance)
+    return ' '.join(returnArray)
 
 def normalize(arr):
     normalizedArr = []
@@ -99,11 +150,14 @@ def normalize(arr):
             print(' '.join(end_sentence))
         normalizedArr.append(' '.join(end_sentence))
 
+    normalizedArr = preveriJezike(normalizedArr)
+    
     return normalizedArr
 
 
 
 ### Da nazaj shraniš podatk2 ###
 data_normalized = normalize(data_opis)
+df.drop(df.index[indexesToRemove], inplace=True)
 df['opis'] = data_normalized
-df.to_csv(os.path.join(dirname, 'data/dogodki_stripped1.csv'), index = False)
+df.to_csv(os.path.join(dirname, 'data/dogodki_strippedOnlySlov.csv'), index = False)

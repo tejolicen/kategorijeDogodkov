@@ -20,7 +20,7 @@ import random
 
 
 dirname = os.path.dirname(__file__)
-input_file = os.path.join(dirname, 'data/dogodki.csv')
+input_file = os.path.join(dirname, 'data/dogodki_strippedOnlySlov.csv')
 df = pd.read_csv(input_file, header = 0)
 original_headers = list(df.columns.values)
 data_opis = df['opis'].astype('U')
