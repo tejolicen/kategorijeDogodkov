@@ -12,8 +12,8 @@ import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
 import polyglot
+import math
 from polyglot.text import Text, Word
-
 
 print(__doc__)
 # 
@@ -74,6 +74,19 @@ ax1.set_ylim([0, len(X) + (n_clusters + 1) * 10])
 # Initialize the clusterer with n_clusters value
 clusterer = KMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, n_init=1)
 cluster_labels = clusterer.fit_predict(X)
+centers = clusterer.cluster_centers_
+
+def distance(p0, p1):
+    return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
+
+centerDistances = []
+for i in range(len(cluster_labels)):
+    centerDistances.append(distance(centers[cluster_labels[i]], X[i]))  # distanca med centrom gruče in dogodkom
+
+df['cluster'] = cluster_labels
+df['center_distance'] = centerDistances
+
+df.to_csv(os.path.join(dirname, 'scripts\\data\\dogodki_kmeansResults.csv'), index = False)
 
 # The silhouette_score gives the average value for all the samples.
 # This gives a perspective into the density and separation of the formed
