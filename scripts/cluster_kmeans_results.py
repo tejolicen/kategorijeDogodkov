@@ -29,11 +29,13 @@ print(__doc__)
 #                  random_state=1)  # For reproducibility
 
 __file__ = os.getcwd()
-dirname = os.path.dirname(__file__)
+dirname = __file__ #os.path.dirname(__file__)
 input_file = os.path.join(dirname, 'scripts\\data\\dogodki_strippedOnlySlov.csv')
 df = pd.read_csv(input_file, header = 0)
 original_headers = list(df.columns.values)
 data_opis_normalized = df['opis'].astype('U')
+
+
 
 def get_top_keywords(data, clusters, labels, n_terms):
     df = pd.DataFrame(data).groupby(clusters).mean()
@@ -47,10 +49,10 @@ vectorizer = TfidfVectorizer(use_idf=True, max_df=0.95, min_df=2, max_features=n
 X_idf = vectorizer.fit_transform(data_opis_normalized)
 
 
-agglo = cluster.FeatureAgglomeration(n_clusters=100)
-agglo.fit(X_idf.todense())
-X_reduced = agglo.transform(X_idf.todense())
-#X_reduced = X_idf.todense()
+# agglo = cluster.FeatureAgglomeration(n_clusters=100)
+# agglo.fit(X_idf.todense())
+# X_reduced = agglo.transform(X_idf.todense())
+# X_reduced = X_idf.todense()
 
 
 # We train the PCA on the dense version of the tf-idf. 
@@ -72,7 +74,7 @@ ax1.set_xlim([-0.1, 1])
 ax1.set_ylim([0, len(X) + (n_clusters + 1) * 10])
 
 # Initialize the clusterer with n_clusters value
-clusterer = KMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, n_init=1)
+clusterer = KMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, n_init=1, random_state=1) # random_state = 1 (seed)
 cluster_labels = clusterer.fit_predict(X)
 centers = clusterer.cluster_centers_
 
@@ -87,6 +89,12 @@ df['cluster'] = cluster_labels
 df['center_distance'] = centerDistances
 
 df.to_csv(os.path.join(dirname, 'scripts\\data\\dogodki_kmeansResults.csv'), index = False)
+
+for i in range(n_clusters):
+    loc_clusterDF = df.loc[df['cluster'] == i]
+    loc_clusterDF_sorted = loc_clusterDF.sort_values(by=['cluster', 'center_distance'])
+    loc_clusterDF_sorted[:20].to_csv(os.path.join(dirname, 'scripts\\data\\kmeans_clusters\\cluster_' + str(i) + '_top20_.csv'), index = False)
+
 
 # The silhouette_score gives the average value for all the samples.
 # This gives a perspective into the density and separation of the formed
