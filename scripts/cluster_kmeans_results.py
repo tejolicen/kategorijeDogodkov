@@ -7,6 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import decomposition, cluster
 
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
@@ -15,22 +16,10 @@ import polyglot
 import math
 from polyglot.text import Text, Word
 
-print(__doc__)
-# 
-# Generating the sample data from make_blobs
-# This particular setting has one distinct cluster and 3 clusters placed close
-# together.
-# X, y = make_blobs(n_samples=500,
-#                  n_features=2,
-#                  centers=4,
-#                  cluster_std=1,
-#                  center_box=(-10.0, 10.0),
-#                  shuffle=True,
-#                  random_state=1)  # For reproducibility
 
 __file__ = os.getcwd()
 dirname = __file__ #os.path.dirname(__file__)
-input_file = os.path.join(dirname, 'scripts\\data\\dogodki_strippedOnlySlov.csv')
+input_file = os.path.join(dirname, 'scripts\\data\\dogodki100_strippedOnlySlov.csv')
 df = pd.read_csv(input_file, header = 0)
 original_headers = list(df.columns.values)
 data_opis_normalized = df['opis'].astype('U')
@@ -57,43 +46,52 @@ X_idf = vectorizer.fit_transform(data_opis_normalized)
 
 # We train the PCA on the dense version of the tf-idf. 
 pca = PCA(n_components=2)
-X = pca.fit_transform(X_idf.todense())
+X_pca = pca.fit_transform(X_idf.todense())
+
+
+tsne = TSNE(n_components=2, verbose=1, perplexity=30, n_iter=5000, learning_rate=200)
+X_tsne = tsne.fit_transform(X_idf.todense())
 
 n_clusters = 7
-
-# Create a subplot with 1 row and 2 columns
-fig, (ax1, ax2) = plt.subplots(1, 2)
-fig.set_size_inches(18, 7)
-
-# The 1st subplot is the silhouette plot
-# The silhouette coefficient can range from -1, 1 but in this example all
-# lie within [-0.1, 1]
-ax1.set_xlim([-0.1, 1])
-# The (n_clusters+1)*10 is for inserting blank space between silhouette
-# plots of individual clusters, to demarcate them clearly.
-ax1.set_ylim([0, len(X) + (n_clusters + 1) * 10])
-
-# Initialize the clusterer with n_clusters value
-clusterer = KMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, n_init=1, random_state=1) # random_state = 1 (seed)
-cluster_labels = clusterer.fit_predict(X)
-centers = clusterer.cluster_centers_
 
 def distance(p0, p1):
     return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
-centerDistances = []
-for i in range(len(cluster_labels)):
-    centerDistances.append(distance(centers[cluster_labels[i]], X[i]))  # distanca med centrom gruče in dogodkom
+# Initialize the clusterer with n_clusters value
+clusterer_pca = KMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, n_init=1, random_state=1) # random_state = 1 (seed)
+cluster_labels_pca = clusterer_pca.fit_predict(X_pca)
+centers_pca = clusterer_pca.cluster_centers_
+centerDistances_pca = []
+for i in range(len(cluster_labels_pca)):
+    centerDistances_pca.append(distance(centers_pca[cluster_labels_pca[i]], X_pca[i]))  # distanca med centrom gruče in dogodkom
 
-df['cluster'] = cluster_labels
-df['center_distance'] = centerDistances
 
-df.to_csv(os.path.join(dirname, 'scripts\\data\\dogodki_kmeansResults.csv'), index = False)
+# Initialize the clusterer with n_clusters value
+clusterer_tsne = KMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, n_init=1, random_state=1) # random_state = 1 (seed)
+cluster_labels_tsne = clusterer_tsne.fit_predict(X_tsne)
+centers_tsne = clusterer_tsne.cluster_centers_
+centerDistances_tsne = []
+for i in range(len(cluster_labels_tsne)):
+    centerDistances_tsne.append(distance(centers_tsne[cluster_labels_tsne[i]], X_tsne[i]))  # distanca med centrom gruče in dogodkom
+
+
+
+df['cluster_pca'] = cluster_labels_pca
+df['center_distance_pca'] = centerDistances_pca
+
+df['cluster_tsne'] = cluster_labels_tsne
+df['center_distance_tsne'] = centerDistances_tsne
+
+df.to_csv(os.path.join(dirname, 'scripts\\data\\dogodki100_kmeansResults.csv'), index = False)
 
 for i in range(n_clusters):
-    loc_clusterDF = df.loc[df['cluster'] == i]
-    loc_clusterDF_sorted = loc_clusterDF.sort_values(by=['cluster', 'center_distance'])
-    loc_clusterDF_sorted[:20].to_csv(os.path.join(dirname, 'scripts\\data\\kmeans_clusters\\cluster_' + str(i) + '_top20_.csv'), index = False)
+    loc_cluster_pca_DF = df.loc[df['cluster_pca'] == i]
+    loc_cluster_pca_DF_sorted = loc_cluster_pca_DF.sort_values(by=['cluster_pca', 'center_distance_pca'])
+    loc_cluster_pca_DF_sorted[:20].to_csv(os.path.join(dirname, 'scripts\\data\\kmeans_clusters\\cluster_pca_' + str(i) + '_top20_.csv'), index = False)
+    loc_cluster_tsne_DF = df.loc[df['cluster_tsne'] == i]
+    loc_cluster_tsne_DF_sorted = loc_cluster_tsne_DF.sort_values(by=['cluster_tsne', 'center_distance_tsne'])
+    loc_cluster_tsne_DF_sorted[:20].to_csv(os.path.join(dirname, 'scripts\\data\\kmeans_clusters\\cluster_tsne_' + str(i) + '_top20_.csv'), index = False)
+
 
 
 # The silhouette_score gives the average value for all the samples.

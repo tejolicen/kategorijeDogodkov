@@ -33,12 +33,12 @@ ON FGEO.FGEO_SIF = (CASE WHEN FEVE.FEVE_GEO IS NOT NULL THEN FEVE.FEVE_GEO ELSE
 						END END)
 WHERE FEVE_DOD < '2020-06-04'
 AND FGEO.FDRZ_SIF = 197
-AND FEVE_STU > 500"""
+AND FEVE_STU > 100"""
 
 
 
 dirname = os.path.dirname(__file__)
-csv_file_path = os.path.join(dirname, 'data/dogodki.csv')
+csv_file_path = os.path.join(dirname, 'data/dogodki100.csv')
 
 try:
     cur.execute(sql)

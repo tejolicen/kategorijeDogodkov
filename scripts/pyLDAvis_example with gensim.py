@@ -12,7 +12,7 @@ import pyLDAvis.gensim
 import gensim
 
 dirname = os.path.dirname(__file__)
-input_file = os.path.join(dirname, 'data/dogodki_strippedOnlySlov.csv')
+input_file = os.path.join(dirname, 'data/dogodki100_strippedOnlySlov.csv')
 df = pd.read_csv(input_file, header = 0)
 original_headers = list(df.columns.values)
 data_opis_normalized = df['opis'].astype('U')
