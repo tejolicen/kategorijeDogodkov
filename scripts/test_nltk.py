@@ -20,7 +20,7 @@ set(stopwords.words('slovene'))
 
 
 dirname = os.path.dirname(__file__)
-input_file = os.path.join(dirname, 'data/dogodki100.csv')
+input_file = os.path.join(dirname, 'data/dogodki100kategorije.csv')
 df = pd.read_csv(input_file, header = 0)
 original_headers = list(df.columns.values)
 data_opis = df['opis'].astype('U')
@@ -160,4 +160,4 @@ def normalize(arr):
 data_normalized = normalize(data_opis)
 df.drop(df.index[indexesToRemove], inplace=True)
 df['opis'] = data_normalized
-df.to_csv(os.path.join(dirname, 'data/dogodki100_strippedOnlySlov.csv'), index = False)
+df.to_csv(os.path.join(dirname, 'data/dogodki100kategorije_strippedOnlySlov.csv'), index = False)

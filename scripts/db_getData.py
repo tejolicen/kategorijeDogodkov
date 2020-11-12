@@ -13,14 +13,14 @@ db_opts = {
     'user': 'root',
     'password': '',
     'host': 'localhost',
-    'database': 'nalepk19_dogodki',
+    'database': 'dogodki20201112',
     'charset': 'utf8'
 }
 
 db = pymysql.connect(**db_opts)
 cur = db.cursor()
 
-sql = """SELECT FEVE_NAZ naziv, FEVE_OPI opis, FEVE_DOD datum_od, FEVE_STU stevilo, FEVE.FPRI_SIF sifra_prizorisca
+sql_old = """SELECT FEVE_NAZ naziv, FEVE_OPI opis, FEVE_DOD datum_od, FEVE_STU stevilo, FEVE.FPRI_SIF sifra_prizorisca
 FROM FABEVE FEVE
 LEFT OUTER JOIN FABMES FMES
 ON FMES.FMES_SIF = FEVE.FMES_SIF
@@ -35,10 +35,32 @@ WHERE FEVE_DOD < '2020-06-04'
 AND FGEO.FDRZ_SIF = 197
 AND FEVE_STU > 100"""
 
+sql = """
+SELECT FEVE_NAZ naziv, FEVE_OPI opis, FEVE_DOD datum_od, FEVE_STU stevilo, FEVE.FPRI_SIF sifra_prizorisca,
+   GROUP_CONCAT(FCOE.FCAT_SIF SEPARATOR ',') as kategorije_sifre, GROUP_CONCAT(FCAT_NAZ SEPARATOR ',') as kategorije_nazivi
+FROM FABEVE FEVE
+LEFT OUTER JOIN FABMES FMES
+ON FMES.FMES_SIF = FEVE.FMES_SIF
+LEFT OUTER JOIN FABPRI FPRI
+ON FPRI.FPRI_SIF = FEVE.FPRI_SIF
+LEFT OUTER JOIN FABGEO FGEO
+ON FGEO.FGEO_SIF = (CASE WHEN FEVE.FEVE_GEO IS NOT NULL THEN FEVE.FEVE_GEO ELSE 
+						CASE WHEN FPRI_GEO IS NOT NULL THEN FPRI_GEO ELSE 
+							FMES_GEO 
+						END END)
+JOIN FABCOE FCOE -- dodaj LEFT, če hočeš da ti vrne tudi brez kategorij
+ON FCOE.FEVE_SIF = FEVE.FEVE_SIF
+LEFT JOIN FABCAT FCAT
+ON FCOE.FCAT_SIF = FCAT.FCAT_SIF
+WHERE FEVE_DOD < '2020-06-04'
+AND FGEO.FDRZ_SIF = 197
+AND FEVE_STU > 100
+GROUP BY FEVE.FEVE_SIF"""
+
 
 
 dirname = os.path.dirname(__file__)
-csv_file_path = os.path.join(dirname, 'data/dogodki100.csv')
+csv_file_path = os.path.join(dirname, 'data/dogodki100kategorije.csv')
 
 try:
     cur.execute(sql)

@@ -29,12 +29,29 @@ print(__doc__)
 #                  random_state=1)  # For reproducibility
 
 dirname = os.path.dirname(__file__)
-input_file = os.path.join(dirname, 'data/dogodki_strippedOnlySlov.csv')
+input_file = os.path.join(dirname, 'data/dogodki100inglavnekategorije_strippedOnlySlov.csv')
 df = pd.read_csv(input_file, header = 0)
 original_headers = list(df.columns.values)
 data_opis_normalized = df['opis'].astype('U')
+data_kats = df['kategorije_sifre']
 
+_GLAVNE_KATEGORIJE = ['2', '15', '5', '25', '3', '38', '1', '27', '18', '4', '32', '64', '36', '6', '17', '13', '28', '29']
+_KATEGORIJE_NAZIVI = ['Music', 'Party', 'Other', 'Art', 'Sports', 'Dance', 'Wellness', 'Health', 'Food', 'Volunteering', 'Causes', 'Comedy', 'Film', 'Concert', 'Theater', 'Online', 'Crafts', 'Literature']
 
+for i in range(len(data_kats)):
+    kats = data_kats[i]
+    only_first_kat = ''
+    katsArr = kats.split(',')
+    for kat in katsArr:
+        for glavnaKat in _GLAVNE_KATEGORIJE:
+            if(kat == glavnaKat):
+                only_first_kat = kat
+                break
+        if(only_first_kat != ''):
+            break
+    if(only_first_kat != ''):
+        data_kats[i] = only_first_kat
+#
 
 no_features = 2000
 vectorizer = TfidfVectorizer(use_idf=True, max_df=0.95, min_df=2, max_features=no_features)  #stop_words='english', 
@@ -43,8 +60,8 @@ X_idf = vectorizer.fit_transform(data_opis_normalized)
 
 agglo = cluster.FeatureAgglomeration(n_clusters=100)
 agglo.fit(X_idf.todense())
-X_reduced = agglo.transform(X_idf.todense())
-#X_reduced = X_idf.todense()
+#X_reduced = agglo.transform(X_idf.todense())
+X_reduced = X_idf.todense()
 
 
 # We train the PCA on the dense version of the tf-idf. 
@@ -129,9 +146,12 @@ for n_clusters in range_n_clusters:
     ax1.set_xticks([-0.1, 0, 0.2, 0.4, 0.6, 0.8, 1])
 
     # 2nd Plot showing the actual clusters formed
-    colors = cm.nipy_spectral(cluster_labels.astype(float) / n_clusters)
-    ax2.scatter(X[:, 0], X[:, 1], marker='.', s=30, lw=0, alpha=0.7,
+    colors = cm.nipy_spectral(data_kats.astype(float) / len(_GLAVNE_KATEGORIJE))
+    scat = ax2.scatter(X[:, 0], X[:, 1], marker='.', s=30, lw=0, alpha=0.7,
                 c=colors, edgecolor='k')
+
+    ax2.legend()
+
 
     # Labeling the clusters
     centers = clusterer.cluster_centers_
