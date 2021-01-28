@@ -16,7 +16,7 @@ import polyglot
 from polyglot.text import Text, Word
 import random
 
-_GLAVNE_KATEGORIJE = ['2', '15', '5', '25', '3', '38', '1', '27', '18', '32', '64', '36', '17', '13', '28', '29', '21', '53', '49']
+_GLAVNE_KATEGORIJE = ['2',     '15',    '5',     '25',  '3',      '38',    '1',        '27',     '18',   '32',     '64',     '36',   '17',      '13',     '28',     '29',         '21',     '53',      '49']
 _KATEGORIJE_NAZIVI = ['Music', 'Party', 'Other', 'Art', 'Sports', 'Dance', 'Wellness', 'Health', 'Food', 'Causes', 'Comedy', 'Film', 'Theater', 'Online', 'Crafts', 'Literature', 'Drinks', 'Fitness', 'Networking']
 
 def stripMainCategories(input_file, output_file):
@@ -46,12 +46,28 @@ def stripMainCategories(input_file, output_file):
                     break
             if(only_first_kats != ''):
                 break
+        
+        if(only_first_kats == ''):  # če nima ene od glavnih kategorij jo pripišemo pod other
+            only_first_kats = '5'
+            only_first_katn = 'Other'
         if(only_first_kats != ''):
+            if(only_first_kats == '28' or only_first_kats == '49' or only_first_kats == '29'): # Crafts, Networking, Literature -> Other
+                only_first_kats = '5'
+                only_first_katn = 'Other'
+            if(only_first_kats == '1' or only_first_kats == '53'): # Wellness, Fitness -> Health
+                only_first_kats = '27'
+                only_first_katn = 'Health'
+            if(only_first_kats == '21'): # Drinks -> Party
+                only_first_kats = '15'
+                only_first_katn = 'Party'
+            if(only_first_kats == '17'): # Theater -> Film
+                only_first_kats = '36'
+                only_first_katn = 'Film'
+
             data_kats_new[i] = only_first_kats
             data_katn_new[i] = only_first_katn
         else:
             indexesToRemove.append(i)   # dogodek ne vsebuje ene od glavnih categorij
-
 
 
     df['kategorije_sifre_new'] = data_kats_new
@@ -63,6 +79,6 @@ def stripMainCategories(input_file, output_file):
 
 __file__ = os.getcwd()
 dirname = os.path.dirname(__file__)
-input_file = os.path.join(dirname, 'scripts\\data\\dogodki100kategorije_strippedOnlySlov.csv')
-outut_file = os.path.join(dirname, 'scripts\\data\\dogodki100samoglavne_strippedOnlySlov.csv')
+input_file = os.path.join(dirname, 'scripts\\data\\dogodki50_spucano.csv')
+outut_file = os.path.join(dirname, 'scripts\\data\\dogodki50_spucano_glavnekategorije.csv')
 stripMainCategories(input_file, outut_file)

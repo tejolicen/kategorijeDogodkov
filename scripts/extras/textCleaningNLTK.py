@@ -19,12 +19,6 @@ set(stopwords.words('slovene'))
 
 
 
-dirname = os.path.dirname(__file__)
-input_file = os.path.join(dirname, '../data/dogodki100kategorije.csv')
-df = pd.read_csv(input_file, header = 0)
-original_headers = list(df.columns.values)
-data_opis = df['opis'].astype('U')
-dataLength = len(data_opis)
 
 print_output = False
 
@@ -148,19 +142,33 @@ def preprocessText(item):
         print(preprocessedText)
     return preprocessedText
 
-def preprocessArray(arr):
+
+def preprocessArray(arr, preveriJezik = False):
     ppdArr = []
     for item in arr:
         ppdArr.append(preprocessText(item))
 
-    ppdArr = preveriJezike(ppdArr)
+    if(preveriJezik):
+        ppdArr = preveriJezike(ppdArr)
     
     return ppdArr
 
 
 
+dirname = os.path.dirname(__file__)
+input_file = os.path.join(dirname, '../data/dogodki50.csv')
+df = pd.read_csv(input_file, header = 0)
+original_headers = list(df.columns.values)
+data_opis = df['opis'].astype('U')
+data_naziv = df['naziv'].astype('U')
+dataLength = len(data_opis)
+
+print(dataLength)
+
 ### Da nazaj shraniš podatk2 ###
-data_normalized = preprocessArray(data_opis)
+data_normalized = preprocessArray(data_opis, True)
+naziv_normalized = preprocessArray(data_naziv)
+df['nazivpp'] = naziv_normalized
 df.drop(df.index[indexesToRemove], inplace=True)
 df['opis'] = data_normalized
-df.to_csv(os.path.join(dirname, '../data/dogodki100kategorije_strippedOnlySlov.csv'), index = False)
+df.to_csv(os.path.join(dirname, '../data/dogodki50_spucano.csv'), index = False)

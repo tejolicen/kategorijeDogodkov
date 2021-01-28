@@ -37,7 +37,8 @@ AND FEVE_STU > 100"""
 
 sql = """
 SELECT FEVE_NAZ naziv, FEVE_OPI opis, FEVE_DOD datum_od, FEVE_STU stevilo, FEVE.FPRI_SIF sifra_prizorisca,
-   GROUP_CONCAT(FCOE.FCAT_SIF SEPARATOR ',') as kategorije_sifre, GROUP_CONCAT(FCAT_NAZ SEPARATOR ',') as kategorije_nazivi
+   GROUP_CONCAT(FCOE.FCAT_SIF SEPARATOR ',') as kategorije_sifre, GROUP_CONCAT(FCAT_NAZ SEPARATOR ',') as kategorije_nazivi,
+   VESELICA veselica
 FROM FABEVE FEVE
 LEFT OUTER JOIN FABMES FMES
 ON FMES.FMES_SIF = FEVE.FMES_SIF
@@ -53,14 +54,16 @@ ON FCOE.FEVE_SIF = FEVE.FEVE_SIF
 LEFT JOIN FABCAT FCAT
 ON FCOE.FCAT_SIF = FCAT.FCAT_SIF
 WHERE FEVE_DOD < '2020-06-04'
-AND FGEO.FDRZ_SIF = 197
-AND FEVE_STU > 100
-GROUP BY FEVE.FEVE_SIF"""
+AND FGEO.FDRZ_SIF = 197 -- drzava slovenija
+AND FEVE_STU > 50 -- st udelezencev
+AND FEVE_SIFP IS NULL -- je parent
+GROUP BY FEVE.FEVE_SIF -- grupiranje rabimo za kategorije"""
+
 
 
 
 dirname = os.path.dirname(__file__)
-csv_file_path = os.path.join(dirname, 'data/dogodki100kategorije.csv')
+csv_file_path = os.path.join(dirname, '../data/dogodki50.csv')
 
 try:
     cur.execute(sql)
