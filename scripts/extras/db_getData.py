@@ -13,7 +13,7 @@ db_opts = {
     'user': 'root',
     'password': '',
     'host': 'localhost',
-    'database': 'dogodki20201112',
+    'database': 'dogodki20210130',
     'charset': 'utf8'
 }
 
@@ -38,7 +38,7 @@ AND FEVE_STU > 100"""
 sql = """
 SELECT FEVE_NAZ naziv, FEVE_OPI opis, FEVE_DOD datum_od, FEVE_STU stevilo, FEVE.FPRI_SIF sifra_prizorisca,
    GROUP_CONCAT(FCOE.FCAT_SIF SEPARATOR ',') as kategorije_sifre, GROUP_CONCAT(FCAT_NAZ SEPARATOR ',') as kategorije_nazivi,
-   VESELICA veselica
+   FEVE_VES veselica
 FROM FABEVE FEVE
 LEFT OUTER JOIN FABMES FMES
 ON FMES.FMES_SIF = FEVE.FMES_SIF

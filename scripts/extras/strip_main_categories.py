@@ -22,7 +22,7 @@ _KATEGORIJE_NAZIVI = ['Music', 'Party', 'Other', 'Art', 'Sports', 'Dance', 'Well
 def stripMainCategories(input_file, output_file):
     df = pd.read_csv(input_file, header = 0)
     original_headers = list(df.columns.values)
-    data_opis_normalized = df['opis'].astype('U')
+    data_opis_normalized = df['opispp'].astype('U')
     data_kats = df['kategorije_sifre']
     data_katn = df['kategorije_nazivi']
     
@@ -58,6 +58,12 @@ def stripMainCategories(input_file, output_file):
                 only_first_kats = '27'
                 only_first_katn = 'Health'
             if(only_first_kats == '21'): # Drinks -> Party
+                only_first_kats = '15'
+                only_first_katn = 'Party'
+            #if(only_first_kats == '2'): # Music -> Party
+            #    only_first_kats = '15'
+            #    only_first_katn = 'Party'
+            if(only_first_kats == '38'): # Dance -> Party
                 only_first_kats = '15'
                 only_first_katn = 'Party'
             if(only_first_kats == '17'): # Theater -> Film
