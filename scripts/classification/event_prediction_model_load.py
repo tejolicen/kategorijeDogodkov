@@ -57,6 +57,8 @@ for text in texts:
     
 text_features = loaded_tfidf.transform(textsCleaned)
 predictions = loaded_model.predict(text_features)
+predictions = loaded_model.predict_proba(text_features)
+
 for text, predicted in zip(textsCleaned, predictions):
   print('"{}"'.format(text))
   print("  - Predicted as: '{}'".format(categoryDict[predicted]))

@@ -11,6 +11,7 @@ from sklearn.svm import SVC
 import sys
 from sklearn import metrics
 
+from nltk.classify.scikitlearn import SklearnClassifier
 import pickle
 
 
@@ -24,7 +25,7 @@ category_id_df = df[['kategorije_nazivi_new', 'category_id']].drop_duplicates().
 category_to_id = dict(category_id_df.values)
 id_to_category = dict(category_id_df[['category_id', 'kategorije_nazivi_new']].values)
 
-tfidf = TfidfVectorizer(sublinear_tf=True, max_df=0.95, min_df=3, ngram_range=(1, 2), norm='l2')
+tfidf = TfidfVectorizer(sublinear_tf=True, max_df=0.95, min_df=4, ngram_range=(1, 2), norm='l2')
 
 features = tfidf.fit_transform(df.opispp).toarray()
 labels = df.category_id
@@ -32,9 +33,9 @@ labels = df.category_id
 #model = LinearSVC()
 model = SVC(kernel='linear',probability=True)
 
-X_train, X_test, y_train, y_test, indices_train, indices_test = train_test_split(features, labels, df.index, test_size=0.33, random_state=0)
+X_train, X_test, y_train, y_test, indices_train, indices_test = train_test_split(features, labels, df.index, test_size=0.2, random_state=0)
 model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
+y_pred = model.predict_proba(X_test)
 
 conf_mat = confusion_matrix(y_test, y_pred)
 fig, ax = plt.subplots(figsize=(8,6))

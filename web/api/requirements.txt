@@ -1,0 +1,10 @@
+lemmagen3==3.3.1
+numpy==1.19.5
+pandas==1.2.0
+Flask==1.1.2
+nltk==3.5
+polyglot==16.7.4
+pyicu==2.7.2
+pycld2==0.41
+Morfessor==2.0.6
+sklearn
