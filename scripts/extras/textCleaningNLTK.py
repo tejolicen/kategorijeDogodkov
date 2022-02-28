@@ -21,10 +21,10 @@ set(stopwords.words('slovene'))
 
 
 
-print_output = False
 
 
-def preprocessText(item):
+
+def preprocessText(item, print_output = False):
     if(print_output):
         print('--------------------------------------------INPUT ITEM:')
         print(item)
@@ -95,3 +95,10 @@ def preprocessText(item):
         print('--------------------------------------------LENGTH > 2:')
         print(preprocessedText)
     return preprocessedText
+
+tes = '❤️Trenutno najbolj vroča pevka na slovenski glasbeni sceni, NINA PUŠLAR, se tudi tokrat vrača v našo Vinoteko in obljublja, da bo s svojim odličnim bandom odpela vse stare hite, predstavila pa nam bo tudi sveže pesmi s svojega na novo izdanega albuma, ki smo ga vsi že nestrpno pričakovali! 😉 Vabljeni v SOBOTO, 12. 10. 2019, ob 22:00, v Vinoteko Rožmarin. Več informacij na https://www.rozmarin.si/'
+
+tes1 = preprocessText(tes, True)
+
+print(tes1)
+

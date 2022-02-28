@@ -18,24 +18,28 @@ sys.path.append(os.path.abspath("extras"))
 from textCleaningNLTK import preprocessText
 
 categoryDict = {
-    10:'Comedy',
-    9:'Health',
-    8:'Food',
-    7:'Causes',
-    6:'Sports',
-    5:'Other',
-    4:'Music',
-    3:'Party',
+    10:'Komedija',
+    9:'Zdravje',
+    8:'Hrana',
+    7:'Dobrodelnost',
+    6:'Šport',
+    5:'Ostalo',
+    4:'Glasba',
+    3:'Zabava',
     2:'Veselica',
-    1:'Art',
+    1:'Umetnost',
     0:'Film'
 }
 
+_PROBA = False
 
 # load the model from disk
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, '../data/model.pickle')
 filenameTFIDF = os.path.join(dirname, '../data/tfidf.pickle')
+if _PROBA:
+    filename = os.path.join(dirname, '../data/model_proba.pickle')
+    filenameTFIDF = os.path.join(dirname, '../data/tfidf_proba.pickle')
 loaded_model = pickle.load(open(filename, 'rb'))
 loaded_tfidf = pickle.load(open(filenameTFIDF, 'rb'))
 
@@ -54,13 +58,29 @@ for text in texts:
     preprocessText = preprocessText(text)
     print(preprocessText)
     textsCleaned.append(preprocessText)
-    
-text_features = loaded_tfidf.transform(textsCleaned)
-predictions = loaded_model.predict(text_features)
-predictions = loaded_model.predict_proba(text_features)
 
-for text, predicted in zip(textsCleaned, predictions):
-  print('"{}"'.format(text))
-  print("  - Predicted as: '{}'".format(categoryDict[predicted]))
-  #print("  - Predicted as: '{}'".format(id_to_category[predicted]))
-  print("")
+if _PROBA:
+    text_features = loaded_tfidf.transform(textsCleaned).toarray()
+    predictions = loaded_model.predict_proba(text_features)
+else:
+    text_features = loaded_tfidf.transform(textsCleaned)
+    predictions = loaded_model.predict(text_features)
+
+maxPredictionIndex = -1
+maxPredictionScore = 0 
+# zaenkrat imamo samo 1 prediction naenkrat
+if(len(predictions) > 0):
+    prediction = predictions[0]
+retArr = {}
+if _PROBA:
+    for idx, feat_pred in enumerate(prediction):
+        retArr[categoryDict[idx]] = feat_pred
+        if feat_pred > maxPredictionScore:
+            maxPredictionIndex = idx
+            maxPredictionScore = feat_pred
+else:
+    maxPredictionIndex = prediction
+
+    
+
+print("  - Predicted as: '{}'".format(categoryDict[maxPredictionIndex]))

@@ -63,7 +63,7 @@ for index, row in df.iterrows():
         df.loc[index, 'kategorije_nazivi_new'] = 'Veselica'
         df.loc[index, 'kategorije_sifre_new'] = 999
 
-output_file = os.path.join(dirname, 'scripts\\data\\dogodki50_spucano_glavnekategorije1.csv')
+output_file = os.path.join(dirname, 'scripts\\data\\dogodki50_spucano_glavnekategorije_veselice.csv')
 df.to_csv(output_file, index = False)
 
 #### ------------------- #####
